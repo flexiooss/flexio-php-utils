@@ -3,6 +3,7 @@
 namespace io\flexio\utils;
 
 use \ArrayObject;
+use \Exception;
 
 class TypedArray extends ArrayObject {
    
