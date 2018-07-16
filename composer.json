@@ -1,0 +1,12 @@
+{
+    "name": "flexio/utils",
+    "version": "1.0",
+    "autoload": {
+        "classmap": [
+            "io/"
+        ],
+        "psr-4": {
+            "io\\": "io/"
+        }
+    }
+}
