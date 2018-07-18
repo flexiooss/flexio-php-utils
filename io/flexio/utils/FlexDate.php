@@ -15,15 +15,15 @@ class FlexDate extends DateTime implements JsonSerializable {
     }
 
     public static function newTime( string $time ){
-        return new FlexDate( 'G:i:s' );
+        return new FlexDate( 'G:i:s', $time );
     }
 
     public static function newDate( string $time ){
-        return new FlexDate( 'Y-m-d' );
+        return new FlexDate( 'Y-m-d', $time );
     }
 
     public static function newDateTime( string $time ){
-        return new FlexDate( 'Y-m-dTG:i:s' );
+        return new FlexDate( 'Y-m-dTG:i:s', $time );
     }
 
     public function jsonSerialize() {
