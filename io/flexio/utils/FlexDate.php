@@ -9,7 +9,7 @@ class FlexDate extends DateTime implements JsonSerializable {
 
     private $format;
 
-    private function __construct( string $format, string $time ){
+    public function __construct( string $format, string $time ){
         parent::createFromFormat( $format, $time );
         $this->format = $format;
     }
