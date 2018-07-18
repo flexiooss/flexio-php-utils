@@ -2,7 +2,7 @@
 
 namespace io\flexio\utils;
 
-user \DateTime;
+use \DateTime;
 use \JsonSerializable;
 
 class FlexDate extends DateTime implements JsonSerializable {
