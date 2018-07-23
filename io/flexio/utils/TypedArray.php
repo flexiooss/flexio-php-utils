@@ -24,8 +24,7 @@ class TypedArray extends ArrayObject {
     }
    
     public function offsetSet ( $index , $newval ){
-        ($this->validate)($newval);
-        parent::offsetSet( $this->count(), $newval );
+        parent::offsetSet( $this->count(), ($this->validate)( $newval ) );
     }
 
 }
