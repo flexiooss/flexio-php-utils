@@ -26,6 +26,10 @@ class FlexDate extends DateTime implements JsonSerializable {
         return new FlexDate( 'Y-m-d\TG:i:s', $time );
     }
 
+    public static function newtZDateTime( string $time ){
+        return new FlexDate( 'Y-m-d\TG:i:sP', $time );
+    }
+
     public function jsonSerialize() {
        return $this->format( $this->format );
     }
