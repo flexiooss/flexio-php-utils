@@ -34,4 +34,24 @@ class FlexDate extends DateTime implements JsonSerializable {
        return $this->format( $this->format );
     }
 
+    public static function parse( $date ){
+        $dt = DateTime::createFromFormat('Y-m-d', $date);
+        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+            return FlexDate::newDate( $date );
+        }
+        $dt = DateTime::createFromFormat('Y-m-d\TG:i:s', $date);
+        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+            return FlexDate::newDateTime( $date );
+        }
+        $dt = DateTime::createFromFormat('Y-m-d\TG:i:sP', $date);
+        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+            return FlexDate::newTzDateTime( $date );
+        }
+        $dt = DateTime::createFromFormat('G:i:s', $date);
+        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+            return FlexDate::newTime( $date );
+        }
+        throw new \Exception( "Unparsable date" );
+    }
+
 }
