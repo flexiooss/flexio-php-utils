@@ -6,8 +6,7 @@ use \ArrayObject;
 use \Exception;
 
 class TypedArray extends ArrayObject {
-   
-    private $clazz;
+
     private $validate;
 
     public function __construct( $validate, $input = array() ){
@@ -15,7 +14,6 @@ class TypedArray extends ArrayObject {
             throw new Exception( 'The specified validation function is not callable' );
         }
         $this->validate = $validate;
-        $this->clazz = $clazz;
         foreach( $input as $item ){
             $this->offsetSet( null, $item );
         }
