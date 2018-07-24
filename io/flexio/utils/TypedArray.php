@@ -5,7 +5,7 @@ namespace io\flexio\utils;
 use \ArrayObject;
 use \Exception;
 
-class TypedArray extends ArrayObject {
+class TypedArray extends ArrayObject implements \JsonSerializable {
 
     private $validate;
 
@@ -27,4 +27,7 @@ class TypedArray extends ArrayObject {
         parent::offsetSet( $this->count(), ($this->validate)( $newval ) );
     }
 
+    public function jsonSerialize() {
+        return array_values( $this->getArrayCopy() );
+    }
 }
