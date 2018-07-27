@@ -5,9 +5,9 @@ namespace io\flexio\utils\http;
 interface HttpRequester {
 
     public function get(): ResponseDelegate;
-    public function post( string $contentType, string $body ): ResponseDelegate;
-    public function put( string $contentType, string $body ): ResponseDelegate;
-    public function patch( string $contentType, string $body ): ResponseDelegate;
+    public function post( string $contentType = null, string $body = null ): ResponseDelegate;
+    public function put( string $contentType = null, string $body = null ): ResponseDelegate;
+    public function patch( string $contentType = null, string $body = null ): ResponseDelegate;
     public function delete(): ResponseDelegate;
     public function head(): ResponseDelegate;
 
