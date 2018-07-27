@@ -1,5 +1,6 @@
 <?php
 
+namespace io\flexio\utils\http;
 
 interface HttpRequester {
 

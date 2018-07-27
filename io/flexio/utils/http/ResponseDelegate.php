@@ -1,5 +1,7 @@
 <?php
 
+namespace io\flexio\utils\http;
+
 interface ResponseDelegate {
 
     public function code(): int;
