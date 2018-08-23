@@ -12,7 +12,7 @@ interface HttpRequester {
     public function head(): ResponseDelegate;
 
     public function parameter( string $name, string $value ): HttpRequester;
-    public function arrayParameter( string $name, string $value ): HttpRequester;
+    public function arrayParameter( string $name, array $values ): HttpRequester;
 
     public function header( string $name, string $value ): HttpRequester;
     public function arrayHeader( string $name, array $value ): HttpRequester;
