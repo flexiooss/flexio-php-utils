@@ -11,9 +11,9 @@ interface HttpRequester {
     public function delete(): ResponseDelegate;
     public function head(): ResponseDelegate;
 
-    public function parameter( string $name, string $value ): HttpRequester;
+    public function parameter( string $name, array $value ): HttpRequester;
 
-    public function header( string $name, string $value ): HttpRequester;
+    public function header( string $name, array $value ): HttpRequester;
 
     public function path( string $path ): HttpRequester;
 }
