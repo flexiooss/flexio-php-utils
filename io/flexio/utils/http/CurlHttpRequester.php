@@ -90,7 +90,7 @@ class CurlHttpRequester implements HttpRequester {
         return requestWithPayload( $body, $contentType, 'POST' );
     }
 
-    public function put( string $contentType = null, string $body = {} ): ResponseDelegate {
+    public function put( string $contentType = null, string $body = null ): ResponseDelegate {
         return requestWithPayload( $body, $contentType, 'PUT' );
     }
 
