@@ -83,27 +83,27 @@ class CurlHttpRequester implements HttpRequester {
     }
 
     public function get(): ResponseDelegate {
-        return requestWithoutPayload( 'GET' );
+        return $this->requestWithoutPayload( 'GET' );
     }
 
     public function post( string $contentType = null, string $body = null ): ResponseDelegate {
-        return requestWithPayload( $body, $contentType, 'POST' );
+        return $this->requestWithPayload( $body, $contentType, 'POST' );
     }
 
     public function put( string $contentType = null, string $body = null ): ResponseDelegate {
-        return requestWithPayload( $body, $contentType, 'PUT' );
+        return $this->requestWithPayload( $body, $contentType, 'PUT' );
     }
 
     public function patch( string $contentType = null, string $body = null ): ResponseDelegate {
-        return requestWithPayload( $body, $contentType, 'PATCH' );
+        return $this->requestWithPayload( $body, $contentType, 'PATCH' );
     }
 
     public function delete(): ResponseDelegate {
-        return requestWithoutPayload( 'DELETE' );
+        return $this->requestWithoutPayload( 'DELETE' );
     }
 
     public function head(): ResponseDelegate {
-        return requestWithoutPayload( 'HEAD' );
+        return $this->requestWithoutPayload( 'HEAD' );
     }
 
 
@@ -129,7 +129,7 @@ class CurlHttpRequester implements HttpRequester {
     }
 
     public function path( string $path ): HttpRequester {
-        $this->path = $url;
+        $this->path = $path;
         return $this;
     }
 

@@ -5,7 +5,7 @@ namespace io\flexio\utils\http;
 class CurlResponseDelegate implements ResponseDelegate {
 
     private $code;
-    private $body:
+    private $body;
     private $headers;
 
     public function __construct( int $code, string $body, array $headers = array() ) {
