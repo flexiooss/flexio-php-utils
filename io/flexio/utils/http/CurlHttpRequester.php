@@ -10,8 +10,12 @@ class CurlHttpRequester implements HttpRequester {
     private $responseHeaders = [];
     private $requestHeaders;
     private $requestParameters;
+    private $authToken;
+    private $account;
 
-    public function __construct() {
+    public function __construct( $authToken, $account ) {
+        $this -> authToken = $authToken;
+        $this -> account = $account;
         $this->client = curl_init();
         $this->init();
     }
@@ -20,6 +24,8 @@ class CurlHttpRequester implements HttpRequester {
         curl_setopt($this->client, CURLOPT_SSL_VERIFYPEER, false);
         $this->addHeaderHandler();
         $this->requestHeaders = array();
+        $this->requestHeaders[] = "Authorization: Bearer " . $this->authToken;
+        $this->requestHeaders[] = "X-account: " .$this->account;
         $this->requestParameters = array();
     }
 
