@@ -74,12 +74,11 @@ class CurlHttpRequester implements HttpRequester {
     }
 
     private function requestWithPayload( string $body, string $contentType, $method ): ResponseDelegate {
-        $json = json_encode( $body );
         $this->requestHeaders[] = 'Expect:';
         curl_setopt( $this->client, CURLOPT_CUSTOMREQUEST, $method );
         curl_setopt( $this->client, CURLOPT_URL, $this->path );
         curl_setopt( $this->client, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt( $this->client, CURLOPT_POSTFIELDS, $json );
+        curl_setopt( $this->client, CURLOPT_POSTFIELDS, $body );
         curl_setopt( $this->client, CURLOPT_HTTPHEADER, $this->requestHeaders );
         $response = $this->exec();
         $code = curl_getinfo( $this->client, CURLINFO_HTTP_CODE );
