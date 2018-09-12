@@ -9,13 +9,17 @@ class TypedArray extends ArrayObject implements \JsonSerializable {
 
     private $validate;
 
-    public function __construct( $validate, $input = array() ){
+    public function __construct( $validate, $input = array(), castToArrayObject = false ){
         if( !is_callable( $validate ) ){
             throw new Exception( 'The specified validation function is not callable' );
         }
         $this->validate = $validate;
         foreach( $input as $item ){
-            $this->offsetSet( null, $item );
+            if( castToArrayObject ){
+                $this->offsetSet( null, new \ArrayObject( $item ));
+            }else{
+                $this->offsetSet( null, $item );
+            }
         }
     }
    
