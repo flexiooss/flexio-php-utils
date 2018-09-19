@@ -24,7 +24,7 @@ class TypedArray extends ArrayObject implements \JsonSerializable {
     }
    
     public function append ( $value ){
-        $this->offsetSet( null, $this->validate($value) );
+        $this->offsetSet( null, $value );
     }
    
     public function offsetSet ( $index , $newval ){

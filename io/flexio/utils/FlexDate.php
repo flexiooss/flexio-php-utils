@@ -15,7 +15,7 @@ class FlexDate extends DateTime implements JsonSerializable {
     }
 
     public static function newTime( string $time ){
-        return new FlexDate( 'G:i:s', $time );
+        return new FlexDate( 'G:i:s\Z', $time );
     }
 
     public static function newDate( string $time ){
@@ -23,7 +23,7 @@ class FlexDate extends DateTime implements JsonSerializable {
     }
 
     public static function newDateTime( string $time ){
-        return new FlexDate( 'Y-m-d\TG:i:s', $time );
+        return new FlexDate( 'Y-m-d\TG:i:s\Z', $time );
     }
 
     public static function newtZDateTime( string $time ){
