@@ -9,49 +9,53 @@ class FlexDate extends DateTime implements JsonSerializable {
 
     private $format;
 
-    public function __construct( string $format, string $time ){
+    const datetimePattern = '/(\d{4})\-(\d{2})\-(\d{2})\T(\d{2})\:(\d{2})\:(\d{2})(\.(\d*))?(\Z)?/';
+    const datePattern = '/(\d{4})\-(\d{2})\-(\d{2})/';
+    const timePattern = '/(\d{2})\:(\d{2})\:(\d{2})(\.(\d*))?(\Z)?/';
+
+    const dateFormat = "Y-m-d";
+    const timeFormat = "G:i:s\Z";
+    const datetimeFormat = "Y-m-d\TG:i:s\Z";
+
+    public function __construct( string $format, string $time ) {
         parent::__construct( $time );
         $this->format = $format;
     }
 
-    public static function newTime( string $time ){
-        return new FlexDate( 'G:i:s\Z', $time );
+    public static function newTime( string $time ) {
+        return new FlexDate( FlexDate::timeFormat, $time );
     }
 
-    public static function newDate( string $time ){
-        return new FlexDate( 'Y-m-d', $time );
+    public static function newDate( string $time ) {
+        return new FlexDate( FlexDate::dateFormat, $time );
     }
 
-    public static function newDateTime( string $time ){
-        return new FlexDate( 'Y-m-d\TG:i:s\Z', $time );
+    public static function newDateTime( string $time ) {
+        return new FlexDate( FlexDate::datetimeFormat, $time );
     }
 
-    public static function newtZDateTime( string $time ){
-        return new FlexDate( 'Y-m-d\TG:i:sP', $time );
+    public static function newtZDateTime( string $time ) {
+        return new FlexDate( FlexDate::zonedDatetimeFormat, $time );
     }
 
     public function jsonSerialize() {
-       return $this->format( $this->format );
+        return $this->format( $this->format );
     }
 
-    public static function parse( $date ){
-        $dt = DateTime::createFromFormat('Y-m-d', $date);
-        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+    /**
+     * @param $date
+     * @return FlexDate
+     * @throws \Exception
+     */
+    public static function parse( $date ) {
+        if( preg_match( FlexDate::timePattern, $date ) ) {
+            return FlexDate::newTime( $date );
+        } else if( preg_match( FlexDate::datePattern, $date ) ) {
             return FlexDate::newDate( $date );
-        }
-        $dt = DateTime::createFromFormat('Y-m-d\TG:i:s', $date);
-        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
+        } else if( preg_match( FlexDate::datetimePattern, $date ) ) {
             return FlexDate::newDateTime( $date );
         }
-        $dt = DateTime::createFromFormat('Y-m-d\TG:i:sP', $date);
-        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
-            return FlexDate::newTzDateTime( $date );
-        }
-        $dt = DateTime::createFromFormat('G:i:s', $date);
-        if( $dt !== false && !array_sum($dt->getLastErrors()) ){
-            return FlexDate::newTime( $date );
-        }
-        throw new \Exception( "Unparsable date" );
+        throw new \Exception( "Unparsable date" ); // TODO tz date not implemented yet
     }
 
 }
