@@ -9,9 +9,10 @@ class FlexDate extends DateTime implements JsonSerializable {
 
     private $format;
 
-    const datetimePattern = '/(\d{4})\-(\d{2})\-(\d{2})\T(\d{2})\:(\d{2})\:(\d{2})(\.(\d*))?(\Z)?/';
-    const datePattern = '/(\d{4})\-(\d{2})\-(\d{2})/';
-    const timePattern = '/(\d{2})\:(\d{2})\:(\d{2})(\.(\d*))?(\Z)?/';
+    const datetimePattern = '/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?$/';
+    const tzDatetimePattern = '/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?([+-](\d{2}):(\d{2}))/';
+    const datePattern = '/^(\d{4})-(\d{2})-(\d{2})$/';
+    const timePattern = '/^(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?/';
 
     const dateFormat = "Y-m-d";
     const timeFormat = "G:i:s\Z";
@@ -55,7 +56,7 @@ class FlexDate extends DateTime implements JsonSerializable {
         } else if( preg_match( FlexDate::datetimePattern, $date ) ) {
             return FlexDate::newDateTime( $date );
         }
-        throw new \Exception( "Unparsable date" ); // TODO tz date not implemented yet
+        throw new \Exception( "Unparsable date" ); // #TODO: tz date not implemented yet
     }
 
 }
