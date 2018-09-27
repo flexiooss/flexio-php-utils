@@ -10,13 +10,14 @@ class FlexDate extends DateTime implements JsonSerializable {
     private $format;
 
     const datetimePattern = '/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?$/';
-    const tzDatetimePattern = '/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?([+-](\d{2}):(\d{2}))/';
+    const zonedDatetimePattern = '/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?([+-](\d{2}):(\d{2}))/';
     const datePattern = '/^(\d{4})-(\d{2})-(\d{2})$/';
     const timePattern = '/^(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?/';
 
     const dateFormat = "Y-m-d";
     const timeFormat = "G:i:s\Z";
     const datetimeFormat = "Y-m-d\TG:i:s\Z";
+    const zonedDatetimeFormat = "Y-m-d\TG:i:sP";
 
     public function __construct( string $format, string $time ) {
         parent::__construct( $time );
@@ -35,7 +36,7 @@ class FlexDate extends DateTime implements JsonSerializable {
         return new FlexDate( FlexDate::datetimeFormat, $time );
     }
 
-    public static function newtZDateTime( string $time ) {
+    public static function newTzDateTime( string $time ) {
         return new FlexDate( FlexDate::zonedDatetimeFormat, $time );
     }
 
@@ -55,8 +56,8 @@ class FlexDate extends DateTime implements JsonSerializable {
             return FlexDate::newDate( $date );
         } else if( preg_match( FlexDate::datetimePattern, $date ) ) {
             return FlexDate::newDateTime( $date );
-        } else if( preg_match( FlexDate::tzDatetimePattern, $date ) ) {
-            return FlexDate::newtZDateTime( $date );
+        } else if( preg_match( FlexDate::zonedDatetimePattern, $date ) ) {
+            return FlexDate::newTzDateTime( $date );
         }
         throw new \Exception( "Unparsable date" ); // #TODO: tz date not implemented yet
     }
