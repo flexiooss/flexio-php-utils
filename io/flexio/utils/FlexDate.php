@@ -55,6 +55,8 @@ class FlexDate extends DateTime implements JsonSerializable {
             return FlexDate::newDate( $date );
         } else if( preg_match( FlexDate::datetimePattern, $date ) ) {
             return FlexDate::newDateTime( $date );
+        } else if( preg_match( FlexDate::tzDatetimePattern, $date ) ) {
+            return FlexDate::newtZDateTime( $date );
         }
         throw new \Exception( "Unparsable date" ); // #TODO: tz date not implemented yet
     }
