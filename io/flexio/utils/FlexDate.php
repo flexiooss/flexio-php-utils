@@ -28,22 +28,22 @@ class FlexDate extends DateTime implements JsonSerializable
 
     public static function newTime(string $time = "now")
     {
-        return new FlexDate(FlexDate::timeFormat, $time = "now");
+        return new FlexDate(FlexDate::timeFormat, $time);
     }
 
-    public static function newDate(string $time)
+    public static function newDate(string $time = "now")
     {
-        return new FlexDate(FlexDate::dateFormat, $time = "now");
+        return new FlexDate(FlexDate::dateFormat, $time);
     }
 
-    public static function newDateTime(string $time)
+    public static function newDateTime(string $time = "now")
     {
-        return new FlexDate(FlexDate::datetimeFormat, $time = "now");
+        return new FlexDate(FlexDate::datetimeFormat, $time);
     }
 
-    public static function newTzDateTime(string $time)
+    public static function newTzDateTime(string $time = "now")
     {
-        return new FlexDate(FlexDate::zonedDatetimeFormat, $time = "now");
+        return new FlexDate(FlexDate::zonedDatetimeFormat, $time);
     }
 
     public function jsonSerialize()
