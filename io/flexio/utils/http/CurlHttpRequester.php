@@ -69,7 +69,7 @@ class CurlHttpRequester implements HttpRequester
     {
         $query = http_build_query($this->requestParameters);
         curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($this->client, CURLOPT_URL, $this->path . $query);
+        curl_setopt($this->client, CURLOPT_URL, $this->path .'?'. $query);
         curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
         $response = $this->exec();
