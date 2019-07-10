@@ -3,6 +3,8 @@
 namespace io\flexio\utils\http;
 
 
+use http\Encoding\Stream;
+
 class CurlHttpRequester implements HttpRequester
 {
 
@@ -168,10 +170,20 @@ class CurlHttpRequester implements HttpRequester
 
     public function path(string $path): HttpRequester
     {
-        $this->path = $path;
+        $this->path = $this->clearSlashes( $path );
         return $this;
     }
 
+    function clearSlashes( $path ){
+        while( endWithSlash( $path ) ){
+            $path = substr( $path, 0, -1 );
+        }
+        return $path;
+    }
+
+    function endWithSlash(string $path){
+        return preg_match("/\/$/", $path );
+    }
 
 
 }
