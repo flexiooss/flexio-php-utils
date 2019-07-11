@@ -175,7 +175,7 @@ class CurlHttpRequester implements HttpRequester
     }
 
     function clearSlashes( $path ){
-        while( endWithSlash( $path ) ){
+        while( $this->endWithSlash( $path ) ){
             $path = substr( $path, 0, -1 );
         }
         return $path;
