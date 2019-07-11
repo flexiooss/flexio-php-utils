@@ -23,11 +23,19 @@ class CurlResponseDelegate implements ResponseDelegate {
     }
 
     public function header( string $name ): array {
+        if( isset( $this->headers[$name . "*"] ) ) {
+            return $this->decode( $this->headers[$name . "*"] );
+        }
         return $this -> headers[$name];
     }
 
     public function contentType(): string {
         return $this->header( 'content-type' );
+    }
+
+    private function decode( $string ) {
+        $explode = explode( "'", $string );
+        return urldecode( $explode[count($explode)-1] );
     }
 
 }

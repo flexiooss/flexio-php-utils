@@ -3,6 +3,8 @@
 namespace io\flexio\utils\http;
 
 
+use http\Encoding\Stream;
+
 class CurlHttpRequester implements HttpRequester
 {
 
@@ -136,10 +138,28 @@ class CurlHttpRequester implements HttpRequester
         return $this;
     }
 
-    public function header(string $name, string $value): HttpRequester
-    {
-        $this->requestHeaders[$name] = $value;
+    public function header( string $name, string $value ): HttpRequester {
+        if( $this->needEncoding( $value ) ) {
+            $this->requestHeaders[$name . "*"] = $this->encode( $value );
+        } else {
+            $this->requestHeaders[$name] = $value;
+        }
         return $this;
+    }
+
+    private function needEncoding( string $value ) {
+        $length = strlen($value);
+        for ($i=0; $i<$length; $i++) {
+            $char = $value[$i];
+            if( ord( $char)<=31 || ord( $char)>=127 ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function encode( string $value ) {
+        return "utf-8''" . urlencode( $value );
     }
 
     public function arrayHeader(string $name, array $value): HttpRequester
@@ -150,8 +170,20 @@ class CurlHttpRequester implements HttpRequester
 
     public function path(string $path): HttpRequester
     {
-        $this->path = $path;
+        $this->path = $this->clearSlashes( $path );
         return $this;
     }
+
+    function clearSlashes( $path ){
+        while( $this->endWithSlash( $path ) ){
+            $path = substr( $path, 0, -1 );
+        }
+        return $path;
+    }
+
+    function endWithSlash(string $path){
+        return preg_match("/\/$/", $path );
+    }
+
 
 }
