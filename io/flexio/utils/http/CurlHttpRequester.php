@@ -102,17 +102,17 @@ class CurlHttpRequester implements HttpRequester
 
     public function post(string $contentType = null, string $body = null): ResponseDelegate
     {
-        return $this->requestWithPayload($body, $contentType, 'POST');
+        return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'POST');
     }
 
     public function put(string $contentType = null, string $body = null): ResponseDelegate
     {
-        return $this->requestWithPayload($body, $contentType, 'PUT');
+        return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'PUT');
     }
 
     public function patch(string $contentType = null, string $body = null): ResponseDelegate
     {
-        return $this->requestWithPayload($body, $contentType, 'PATCH');
+        return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'PATCH');
     }
 
     public function delete(): ResponseDelegate
