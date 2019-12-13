@@ -82,6 +82,7 @@ class CurlHttpRequester implements HttpRequester
 
     private function requestWithPayload(string $body, string $contentType, $method): ResponseDelegate
     {
+        $this->requestHeaders[] = 'Content-type: ' . $contentType;
         $this->requestHeaders[] = 'Expect:';
         curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($this->client, CURLOPT_URL, $this->path);
