@@ -1,4 +1,4 @@
 level: dev
-schemes: []
+schemes: [composer]
 topics: []
 version: 2.2.0
