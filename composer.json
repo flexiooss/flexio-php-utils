@@ -1,9 +1,9 @@
 {
-    "name": "flexio/utils",
-    "version": "2.1.2",
-    "autoload": {
-        "psr-4": {
-            "io\\flexio\\utils\\": "io/flexio/utils"
-        }
+  "name": "flexio/utils",
+  "version": "2.3.0-dev",
+  "autoload": {
+    "psr-4": {
+      "io\\flexio\\utils\\": "io/flexio/utils"
     }
+  }
 }
