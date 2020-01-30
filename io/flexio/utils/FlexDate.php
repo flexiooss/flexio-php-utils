@@ -19,10 +19,10 @@ class FlexDate extends DateTime implements JsonSerializable
     const timePattern = '/^(\d{2}):(\d{2}):(\d{2})(\.(\d*))?(Z)?/';
 
     const dateFormat = "Y-m-d";
-    const timeFormat = "H:i:s\Z";
-    const datetimeFormat = "Y-m-d\TH:i:s";
-    const zonedDatetimeFormat = "Y-m-d\TH:i:sP";
-    const zonedDatetimeFormatZulu = "Y-m-d\TH:i:s\Z";
+    const timeFormat = "H:i:s.u\Z";
+    const datetimeFormat = "Y-m-d\TH:i:s.u";
+    const zonedDatetimeFormat = "Y-m-d\TH:i:s.uP";
+    const zonedDatetimeFormatZulu = "Y-m-d\TH:i:s.u\Z";
 
     public function __construct(FlexDateTypeEnum $format, string $time = "now")
     {
