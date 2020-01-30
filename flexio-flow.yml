@@ -1,4 +1,4 @@
-level: dev
+level: stable
 schemes: [composer]
 topics: []
 version: 2.3.0
