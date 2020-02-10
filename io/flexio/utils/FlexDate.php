@@ -60,15 +60,15 @@ class FlexDate extends DateTime implements JsonSerializable
     {
         switch ($this->format) {
             case FlexDateTypeEnum::TIME():
-                return $this->format(FlexDate::timeFormat);
+                return $this->format("H:i:s.") . substr($this->format("u"), 0, 3) . 'Z';
             case FlexDateTypeEnum::DATE():
                 return $this->format(FlexDate::dateFormat);
             case FlexDateTypeEnum::DATETIME():
-                return $this->format(FlexDate::datetimeFormat);
+                return $this->format("Y-m-d\TH:i:s.") . substr($this->format("u"), 0, 3);
             case FlexDateTypeEnum::ZONED_DATETIME():
-                return $this->format(FlexDate::zonedDatetimeFormat);
+                return $this->format("Y-m-d\TH:i:s.") . substr($this->format("u"), 0, 3) . $this->format('P');
             case FlexDateTypeEnum::ZONED_DATETIME_ZULU():
-                return $this->format(FlexDate::zonedDatetimeFormatZulu);
+                return $this->format("Y-m-d\TH:i:s.") . substr($this->format("u"), 0, 3) . 'Z';
         }
 
     }
