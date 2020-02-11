@@ -141,9 +141,9 @@ class CurlHttpRequester implements HttpRequester
 
     public function header( string $name, string $value ): HttpRequester {
         if( $this->needEncoding( $value ) ) {
-            $this->requestHeaders[$name . "*"] = $this->encode( $value );
+            $this->requestHeaders[] = $name . "*: " . $this->encode($value);
         } else {
-            $this->requestHeaders[$name] = $value;
+            $this->requestHeaders[] = $name . ": " . $value;
         }
         return $this;
     }
