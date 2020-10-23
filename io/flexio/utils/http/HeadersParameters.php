@@ -8,6 +8,13 @@ class HeadersParameters
 {
     private $X_Account = null;
     private $Authorization_Bearer = null;
+    private $flexContext = null;
+
+    public function flexContext(string $flexContext): HeadersParameters
+    {
+        $this->flexContext = $flexContext;
+        return $this;
+    }
 
     public function add_X_Account(string $account): HeadersParameters
     {
@@ -30,6 +37,9 @@ class HeadersParameters
         }
         if ($this->Authorization_Bearer !== null) {
             $headers[] = "Authorization: Bearer " . $this->Authorization_Bearer;
+        }
+        if ($this->flexContext !== null) {
+            $headers[] = "flex-context: " . $this->flexContext;
         }
         return $headers;
     }

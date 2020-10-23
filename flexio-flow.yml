@@ -1,4 +1,5 @@
 level: stable
-schemes: [composer]
+schemes:
+- composer
 topics: []
-version: 2.4.1
+version: 2.5.0
