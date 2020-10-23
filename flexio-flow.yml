@@ -1,4 +1,5 @@
-level: dev
-schemes: [composer]
+level: stable
+schemes:
+- composer
 topics: []
 version: 2.5.0
