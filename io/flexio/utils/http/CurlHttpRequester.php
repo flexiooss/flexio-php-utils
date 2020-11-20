@@ -3,8 +3,6 @@
 namespace io\flexio\utils\http;
 
 
-use http\Encoding\Stream;
-
 class CurlHttpRequester implements HttpRequester
 {
 
@@ -14,13 +12,23 @@ class CurlHttpRequester implements HttpRequester
     private $responseHeaders = [];
     private $requestHeaders;
     private $requestParameters;
+    private $logger;
 
 
-    public function __construct(HeadersParameters $headersParams)
+    public function __construct(HeadersParameters $headersParams, callable $logger = null)
     {
         $this->headersParams = $headersParams;
         $this->client = curl_init();
         $this->init();
+        $this->logger = $logger;
+    }
+
+    private function debug(string $message): CurlHttpRequester
+    {
+        if (!is_null($this->logger)) {
+            $this->logger('CURL DEBUG ' . $message);
+        }
+        return $this;
     }
 
     private function init()
@@ -69,19 +77,42 @@ class CurlHttpRequester implements HttpRequester
 
     private function requestWithoutPayload($method): ResponseDelegate
     {
+
         $query = http_build_query($this->requestParameters);
+
+        $this
+            ->debug('requestWithoutPayload')
+            ->debug('method::' . $method)
+            ->debug('path::' . $this->path . '?' . $query)
+            ->debug('headers::' . json_encode($this->responseHeaders));
+
         curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($this->client, CURLOPT_URL, $this->path .'?'. $query);
+        curl_setopt($this->client, CURLOPT_URL, $this->path . '?' . $query);
         curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
         $response = $this->exec();
         $code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($this->client);
         $this->reset();
+
+        $this
+            ->debug('code::' . $code)
+            ->debug('headers::' . json_encode($this->responseHeaders))
+            ->debug('response::' . $response)
+            ->debug('curl_error::' . $curlError);
+
         return new CurlResponseDelegate($code, $response, $this->responseHeaders);
     }
 
     private function requestWithPayload(string $body, string $contentType, $method): ResponseDelegate
     {
+        $this
+            ->debug('requestWithPayload')
+            ->debug('method::' . $method)
+            ->debug('path::' . $this->path)
+            ->debug('headers::' . json_encode($this->responseHeaders))
+            ->debug('body::' . $body);
+
         $this->requestHeaders[] = 'Content-type: ' . $contentType;
         $this->requestHeaders[] = 'Expect:';
         curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
@@ -93,6 +124,13 @@ class CurlHttpRequester implements HttpRequester
         $code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
         $curlError = curl_error($this->client);
         $this->reset();
+
+        $this
+            ->debug('code::' . $code)
+            ->debug('headers::' . json_encode($this->responseHeaders))
+            ->debug('response::' . $response)
+            ->debug('curl_error::' . $curlError);
+
         return new CurlResponseDelegate($code, $response, $this->responseHeaders);
     }
 
@@ -139,8 +177,9 @@ class CurlHttpRequester implements HttpRequester
         return $this;
     }
 
-    public function header( string $name, string $value ): HttpRequester {
-        if( $this->needEncoding( $value ) ) {
+    public function header(string $name, string $value): HttpRequester
+    {
+        if ($this->needEncoding($value)) {
             $this->requestHeaders[] = $name . "*: " . $this->encode($value);
         } else {
             $this->requestHeaders[] = $name . ": " . $value;
@@ -148,19 +187,21 @@ class CurlHttpRequester implements HttpRequester
         return $this;
     }
 
-    private function needEncoding( string $value ) {
+    private function needEncoding(string $value)
+    {
         $length = strlen($value);
-        for ($i=0; $i<$length; $i++) {
+        for ($i = 0; $i < $length; $i++) {
             $char = $value[$i];
-            if( ord( $char)<=31 || ord( $char)>=127 ){
+            if (ord($char) <= 31 || ord($char) >= 127) {
                 return true;
             }
         }
         return false;
     }
 
-    private function encode( string $value ) {
-        return "utf-8''" . urlencode( $value );
+    private function encode(string $value)
+    {
+        return "utf-8''" . urlencode($value);
     }
 
     public function arrayHeader(string $name, array $value): HttpRequester
@@ -171,19 +212,21 @@ class CurlHttpRequester implements HttpRequester
 
     public function path(string $path): HttpRequester
     {
-        $this->path = $this->clearSlashes( $path );
+        $this->path = $this->clearSlashes($path);
         return $this;
     }
 
-    function clearSlashes( $path ){
-        while( $this->endWithSlash( $path ) ){
-            $path = substr( $path, 0, -1 );
+    function clearSlashes($path)
+    {
+        while ($this->endWithSlash($path)) {
+            $path = substr($path, 0, -1);
         }
         return $path;
     }
 
-    function endWithSlash(string $path){
-        return preg_match("/\/$/", $path );
+    function endWithSlash(string $path)
+    {
+        return preg_match("/\/$/", $path);
     }
 
 
