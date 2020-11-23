@@ -26,7 +26,7 @@ class CurlHttpRequester implements HttpRequester
     private function debug(string $message): CurlHttpRequester
     {
         if (!is_null($this->logger)) {
-            $this->logger('CURL DEBUG ' . $message);
+            ($this->logger)('CURL DEBUG ' . $message);
         }
         return $this;
     }
