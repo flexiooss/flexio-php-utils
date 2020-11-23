@@ -1,6 +1,6 @@
 {
   "name": "flexio/utils",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "autoload": {
     "psr-4": {
       "io\\flexio\\utils\\": "io/flexio/utils"
