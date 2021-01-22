@@ -9,10 +9,17 @@ class HeadersParameters
     private $X_Account = null;
     private $Authorization_Bearer = null;
     private $flexContext = null;
+    private $requestId = null;
 
     public function flexContext(string $flexContext): HeadersParameters
     {
         $this->flexContext = $flexContext;
+        return $this;
+    }
+
+    public function requestId(string $value): HeadersParameters
+    {
+        $this->requestId = $value;
         return $this;
     }
 
@@ -40,6 +47,9 @@ class HeadersParameters
         }
         if ($this->flexContext !== null) {
             $headers[] = "flex-context: " . $this->flexContext;
+        }
+        if ($this->requestId !== null) {
+            $headers[] = "x-request-id: " . $this->requestId;
         }
         return $headers;
     }
