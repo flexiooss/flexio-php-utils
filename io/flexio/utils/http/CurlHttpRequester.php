@@ -13,6 +13,7 @@ class CurlHttpRequester implements HttpRequester
     private $requestHeaders;
     private $requestParameters;
     private $logger;
+    private $lastStatus;
 
 
     public function __construct(HeadersParameters $headersParams, callable $logger = null)
@@ -90,18 +91,16 @@ class CurlHttpRequester implements HttpRequester
         curl_setopt($this->client, CURLOPT_URL, $this->path . '?' . $query);
         curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
-        $response = $this->exec();
-        $code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($this->client);
+
+        $this->buildLastStatus($this->exec());
         $this->reset();
 
-        $this
-            ->debug('code::' . $code)
-            ->debug('headers::' . json_encode($this->responseHeaders))
-            ->debug('response::' . $response)
-            ->debug('curl_error::' . $curlError);
+        $this->debug($this->lastStatus()->__toString());
 
-        return new CurlResponseDelegate($code, $response, $this->responseHeaders);
+        return new CurlResponseDelegate(
+            $this->lastStatus()->getCode(),
+            $this->lastStatus()->getBody(),
+            $this->lastStatus()->getHeaders());
     }
 
     private function requestWithPayload(string $body, string $contentType, $method): ResponseDelegate
@@ -120,18 +119,31 @@ class CurlHttpRequester implements HttpRequester
         curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->client, CURLOPT_POSTFIELDS, $body);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
-        $response = $this->exec();
-        $code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($this->client);
+
+        $this->buildLastStatus($this->exec());
         $this->reset();
 
-        $this
-            ->debug('code::' . $code)
-            ->debug('headers::' . json_encode($this->responseHeaders))
-            ->debug('response::' . $response)
-            ->debug('curl_error::' . $curlError);
+        $this->debug($this->lastStatus()->__toString());
 
-        return new CurlResponseDelegate($code, $response, $this->responseHeaders);
+        return new CurlResponseDelegate(
+            $this->lastStatus()->getCode(),
+            $this->lastStatus()->getBody(),
+            $this->lastStatus()->getHeaders());
+    }
+
+    private function buildLastStatus(string $body): CurlHttpRequester
+    {
+        $this->lastStatus = new CurlStatus(
+            $this->client,
+            $this->responseHeaders,
+            $body
+        );
+        return $this;
+    }
+
+    public function lastStatus(): CurlStatus
+    {
+        return $this->lastStatus;
     }
 
     public function get(): ResponseDelegate
