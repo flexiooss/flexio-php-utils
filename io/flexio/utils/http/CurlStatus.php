@@ -24,6 +24,11 @@ class CurlStatus implements \JsonSerializable
         $this->body = $body;
     }
 
+    public function getError(): string
+    {
+        return $this->error;
+    }
+
     public function getCode(): int
     {
         return $this->code;

@@ -24,6 +24,12 @@ class CurlHttpRequester implements HttpRequester
         $this->logger = $logger;
     }
 
+    public function setCurlOption(int $option, $value): CurlHttpRequester
+    {
+        curl_setopt($this->client, $option, $value);
+        return $this;
+    }
+
     private function debug(string $message): CurlHttpRequester
     {
         if (!is_null($this->logger)) {
@@ -96,6 +102,10 @@ class CurlHttpRequester implements HttpRequester
         $this->reset();
 
         $this->debug($this->lastStatus()->__toString());
+
+        if ($this->lastStatus()->getError() !== '') {
+            throw new HttpIOException('REQUEST FAIL :: ' . $this->lastStatus()->verboseOnSerialize()->__toString());
+        }
 
         return new CurlResponseDelegate(
             $this->lastStatus()->getCode(),
