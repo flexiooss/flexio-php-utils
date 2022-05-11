@@ -55,7 +55,9 @@ class CurlHttpRequester implements HttpRequester
 
     public function __destruct()
     {
-        curl_close($this->client);
+        if (gettype($this->client) === 'resource') {
+            curl_close($this->client);
+        }
     }
 
     private function addHeaderHandler()
