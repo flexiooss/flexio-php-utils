@@ -165,7 +165,7 @@ class CurlHttpRequester implements HttpRequester
             throw new ZeroCodeException('status code 0 :' . $this->lastStatus()->verboseOnSerialize()->__toString());
         }
 
-        $this->debug($this->lastStatus()->__toString());
+        $this->debug('[EXECUTION]: '.$this->lastStatus()->__toString());
 
         return $this;
     }
