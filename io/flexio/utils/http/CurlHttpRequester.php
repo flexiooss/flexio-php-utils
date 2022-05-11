@@ -55,7 +55,9 @@ class CurlHttpRequester implements HttpRequester
 
     public function __destruct()
     {
-        curl_close($this->client);
+        if (gettype($this->client) === 'resource') {
+            curl_close($this->client);
+        }
     }
 
     private function addHeaderHandler()
@@ -82,6 +84,10 @@ class CurlHttpRequester implements HttpRequester
         return curl_exec($this->client);
     }
 
+    /**
+     * @throws ZeroCodeException
+     * @throws HttpIOException
+     */
     private function requestWithoutPayload($method): ResponseDelegate
     {
 
@@ -98,14 +104,9 @@ class CurlHttpRequester implements HttpRequester
         curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
 
-        $this->buildLastStatus($this->exec());
-        $this->reset();
-
-        $this->debug($this->lastStatus()->__toString());
-
-        if ($this->lastStatus()->getError() !== '') {
-            throw new HttpIOException('REQUEST FAIL :: ' . $this->lastStatus()->verboseOnSerialize()->__toString());
-        }
+        $this
+            ->buildLastStatus($this->exec())
+            ->reset();
 
         return new CurlResponseDelegate(
             $this->lastStatus()->getCode(),
@@ -113,6 +114,10 @@ class CurlHttpRequester implements HttpRequester
             $this->lastStatus()->getHeaders());
     }
 
+    /**
+     * @throws ZeroCodeException
+     * @throws HttpIOException
+     */
     private function requestWithPayload(string $body, string $contentType, $method): ResponseDelegate
     {
         $this
@@ -130,10 +135,9 @@ class CurlHttpRequester implements HttpRequester
         curl_setopt($this->client, CURLOPT_POSTFIELDS, $body);
         curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
 
-        $this->buildLastStatus($this->exec());
-        $this->reset();
-
-        $this->debug($this->lastStatus()->__toString());
+        $this
+            ->buildLastStatus($this->exec())
+            ->reset();
 
         return new CurlResponseDelegate(
             $this->lastStatus()->getCode(),
@@ -141,6 +145,10 @@ class CurlHttpRequester implements HttpRequester
             $this->lastStatus()->getHeaders());
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     private function buildLastStatus(string $body): CurlHttpRequester
     {
         $this->lastStatus = new CurlStatus(
@@ -148,6 +156,17 @@ class CurlHttpRequester implements HttpRequester
             $this->responseHeaders,
             $body
         );
+
+        if ($this->lastStatus()->getError() !== '') {
+            throw new HttpIOException('REQUEST FAIL :: ' . $this->lastStatus()->verboseOnSerialize()->__toString());
+        }
+
+        if ($this->lastStatus()->getCode() === 0) {
+            throw new ZeroCodeException('status code 0 :' . $this->lastStatus()->verboseOnSerialize()->__toString());
+        }
+
+        $this->debug('[EXECUTION]: '.$this->lastStatus()->__toString());
+
         return $this;
     }
 
@@ -156,36 +175,59 @@ class CurlHttpRequester implements HttpRequester
         return $this->lastStatus;
     }
 
+    /**
+     * @throws ZeroCodeException
+     * @throws HttpIOException
+     */
     public function get(): ResponseDelegate
     {
         return $this->requestWithoutPayload('GET');
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     public function post(string $contentType = null, string $body = null): ResponseDelegate
     {
         return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'POST');
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     public function put(string $contentType = null, string $body = null): ResponseDelegate
     {
         return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'PUT');
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     public function patch(string $contentType = null, string $body = null): ResponseDelegate
     {
         return $this->requestWithPayload($body != null ? $body : "", $contentType != null ? $contentType : 'application/json', 'PATCH');
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     public function delete(): ResponseDelegate
     {
         return $this->requestWithoutPayload('DELETE');
     }
 
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
     public function head(): ResponseDelegate
     {
         return $this->requestWithoutPayload('HEAD');
     }
-
 
     public function parameter(string $name, string $value): HttpRequester
     {
