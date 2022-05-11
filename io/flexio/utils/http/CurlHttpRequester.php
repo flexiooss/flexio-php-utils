@@ -88,7 +88,7 @@ class CurlHttpRequester implements HttpRequester
      * @throws ZeroCodeException
      * @throws HttpIOException
      */
-    private function requestWithoutPayload($method): ResponseDelegate
+    private function requestWithoutPayload(string $method): ResponseDelegate
     {
 
         $query = http_build_query($this->requestParameters);
@@ -106,7 +106,8 @@ class CurlHttpRequester implements HttpRequester
 
         $this
             ->buildLastStatus($this->exec())
-            ->reset();
+            ->reset()
+            ->handleResultStatus($method, $this->path . '?' . $query);
 
         return new CurlResponseDelegate(
             $this->lastStatus()->getCode(),
@@ -118,7 +119,7 @@ class CurlHttpRequester implements HttpRequester
      * @throws ZeroCodeException
      * @throws HttpIOException
      */
-    private function requestWithPayload(string $body, string $contentType, $method): ResponseDelegate
+    private function requestWithPayload(string $body, string $contentType, string $method): ResponseDelegate
     {
         $this
             ->debug('requestWithPayload')
@@ -137,7 +138,8 @@ class CurlHttpRequester implements HttpRequester
 
         $this
             ->buildLastStatus($this->exec())
-            ->reset();
+            ->reset()
+            ->handleResultStatus($method, $this->path);
 
         return new CurlResponseDelegate(
             $this->lastStatus()->getCode(),
@@ -145,10 +147,6 @@ class CurlHttpRequester implements HttpRequester
             $this->lastStatus()->getHeaders());
     }
 
-    /**
-     * @throws HttpIOException
-     * @throws ZeroCodeException
-     */
     private function buildLastStatus(string $body): CurlHttpRequester
     {
         $this->lastStatus = new CurlStatus(
@@ -156,17 +154,6 @@ class CurlHttpRequester implements HttpRequester
             $this->responseHeaders,
             $body
         );
-
-        if ($this->lastStatus()->getError() !== '') {
-            throw new HttpIOException('REQUEST FAIL :: ' . $this->lastStatus()->verboseOnSerialize()->__toString());
-        }
-
-        if ($this->lastStatus()->getCode() === 0) {
-            throw new ZeroCodeException('status code 0 :' . $this->lastStatus()->verboseOnSerialize()->__toString());
-        }
-
-        $this->debug('[EXECUTION]: '.$this->lastStatus()->__toString());
-
         return $this;
     }
 
@@ -291,6 +278,24 @@ class CurlHttpRequester implements HttpRequester
     function endWithSlash(string $path)
     {
         return preg_match("/\/$/", $path);
+    }
+
+    /**
+     * @throws HttpIOException
+     * @throws ZeroCodeException
+     */
+    private function handleResultStatus(string $method, string $path): CurlHttpRequester
+    {
+        if ($this->lastStatus()->getError() !== '') {
+            throw new HttpIOException('REQUEST FAIL, for:' . $method . ':' . $path . ' details:' . $this->lastStatus()->verboseOnSerialize()->__toString());
+        }
+
+        if ($this->lastStatus()->getCode() === 0) {
+            throw new ZeroCodeException('status code 0, for:' . $method . ':' . $path . ' details:' . $this->lastStatus()->verboseOnSerialize()->__toString());
+        }
+
+        $this->debug('[EXECUTION] for:' . $method . ':' . $path . ' details:' . $this->lastStatus()->__toString());
+        return $this;
     }
 
 
