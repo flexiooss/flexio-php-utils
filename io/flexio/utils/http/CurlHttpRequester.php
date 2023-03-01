@@ -14,14 +14,42 @@ class CurlHttpRequester implements HttpRequester
     private $requestParameters;
     private $logger;
     private $lastStatus;
+    private $totalMaxRetry = 5;
+    private $retryStrategy = [
+        0 => [2, 5],
+        500 => [5, 5]
+    ];
 
-
+    /**
+     * @param HeadersParameters $headersParams
+     * @param callable|null $logger - function(string):void
+     */
     public function __construct(HeadersParameters $headersParams, callable $logger = null)
     {
         $this->headersParams = $headersParams;
         $this->client = curl_init();
         $this->init();
         $this->logger = $logger;
+    }
+
+    public function setTotalMaxRetry(int $totalMaxRetry): CurlHttpRequester
+    {
+        $this->totalMaxRetry = $totalMaxRetry;
+        return $this;
+    }
+
+    /**
+     *
+     * @param int $code - HTTP return code
+     * @param int[] $in - define the number of attempts and the waiting time (sec.) between each one
+     * @return $this
+     */
+    public function codeRetryStrategy(int $code, array $in): CurlHttpRequester
+    {
+        $v = $this->retryStrategy;
+        $v[$code] = $in;
+        $this->retryStrategy = $v;
+        return $this;
     }
 
     public function setCurlOption(int $option, $value): CurlHttpRequester
@@ -93,20 +121,26 @@ class CurlHttpRequester implements HttpRequester
 
         $query = http_build_query($this->requestParameters);
 
-        $this
-            ->debug('requestWithoutPayload')
-            ->debug('method::' . $method)
-            ->debug('path::' . $this->path . '?' . $query)
-            ->debug('headers::' . json_encode($this->responseHeaders));
+        $exe = function ($retry) use ($method, $query) {
+            $this
+                ->debug('requestWithoutPayload')
+                ->debug('retry::' . $retry)
+                ->debug('method::' . $method)
+                ->debug('path::' . $this->path . '?' . $query)
+                ->debug('headers::' . json_encode($this->responseHeaders));
 
-        curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($this->client, CURLOPT_URL, $this->path . '?' . $query);
-        curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
+            curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
+            curl_setopt($this->client, CURLOPT_URL, $this->path . '?' . $query);
+            curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
+
+            $this
+                ->buildLastStatus($this->exec())
+                ->reset();
+        };
 
         $this
-            ->buildLastStatus($this->exec())
-            ->reset()
+            ->retryStrategyExecutor($exe)
             ->handleResultStatus($method, $this->path . '?' . $query);
 
         return new CurlResponseDelegate(
@@ -115,30 +149,68 @@ class CurlHttpRequester implements HttpRequester
             $this->lastStatus()->getHeaders());
     }
 
+    private function retryStrategyExecutor(callable $clb): CurlHttpRequester
+    {
+        $retry = 0;
+        $retryStrat = $this->retryStrategy;
+        do {
+            $error = false;
+            $clb($retry);
+            if ($this->lastStatus()->getError() !== '' || $this->lastStatus()->getCode() === 0) {
+                if (!isset($retryStrat[0])) continue;
+                $strat = $retryStrat[0];
+                if (!count($strat)) continue;
+                $wait = array_shift($strat);
+                $retryStrat[0] = $strat;
+                if (!is_numeric($wait)) continue;
+                sleep($wait);
+                $error = true;
+            } elseif (isset($retryStrat[$this->lastStatus()->getCode()])) {
+                $strat = $retryStrat[$this->lastStatus()->getCode()];
+                if (!count($strat)) continue;
+                $wait = array_shift($strat);
+                $retryStrat[$this->lastStatus()->getCode()] = $strat;
+                if (!is_numeric($wait)) continue;
+                sleep($wait);
+                $error = true;
+            }
+
+            $retry++;
+        } while ($error && $retry <= $this->totalMaxRetry);
+
+        return $this;
+    }
+
     /**
      * @throws ZeroCodeException
      * @throws HttpIOException
      */
     private function requestWithPayload(string $body, string $contentType, string $method): ResponseDelegate
     {
-        $this
-            ->debug('requestWithPayload')
-            ->debug('method::' . $method)
-            ->debug('path::' . $this->path)
-            ->debug('headers::' . json_encode($this->responseHeaders))
-            ->debug('body::' . $body);
+        $exe = function ($retry) use ($method, $body, $contentType) {
+            $this
+                ->debug('requestWithPayload')
+                ->debug('retry::' . $retry)
+                ->debug('method::' . $method)
+                ->debug('path::' . $this->path)
+                ->debug('headers::' . json_encode($this->responseHeaders))
+                ->debug('body::' . $body);
 
-        $this->requestHeaders[] = 'Content-type: ' . $contentType;
-        $this->requestHeaders[] = 'Expect:';
-        curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($this->client, CURLOPT_URL, $this->path);
-        curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($this->client, CURLOPT_POSTFIELDS, $body);
-        curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
+            $this->requestHeaders[] = 'Content-type: ' . $contentType;
+            $this->requestHeaders[] = 'Expect:';
+            curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, $method);
+            curl_setopt($this->client, CURLOPT_URL, $this->path);
+            curl_setopt($this->client, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($this->client, CURLOPT_POSTFIELDS, $body);
+            curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->requestHeaders);
+
+            $this
+                ->buildLastStatus($this->exec())
+                ->reset();
+        };
 
         $this
-            ->buildLastStatus($this->exec())
-            ->reset()
+            ->retryStrategyExecutor($exe)
             ->handleResultStatus($method, $this->path);
 
         return new CurlResponseDelegate(
@@ -297,6 +369,4 @@ class CurlHttpRequester implements HttpRequester
         $this->debug('[EXECUTION] for:' . $method . ':' . $path . ' details:' . $this->lastStatus()->__toString());
         return $this;
     }
-
-
 }
