@@ -26,6 +26,9 @@ class FlexDate extends DateTime implements JsonSerializable
 
     public function __construct(FlexDateTypeEnum $format, string $time = "now")
     {
+        if($format == FlexDateTypeEnum::DATETIME()){
+            $time = static::truncateDateTimeMicros($time);
+        }
         parent::__construct($time);
         $this->format = $format;
     }
@@ -54,6 +57,18 @@ class FlexDate extends DateTime implements JsonSerializable
             }
         }
         return new FlexDate($format, $time);
+    }
+
+    public static function truncateDateTimeMicros(string $serializedDate): string
+    {
+        if (preg_match(FlexDate::datetimePattern, $serializedDate, $matches)) {
+
+            if (isset($matches[7]) && isset($matches[8]) && strlen($matches[8]) > 6) {
+                $serializedDate = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . 'T' . $matches[4] . ':' . $matches[5] . ':' . $matches[6] . '.' . substr($matches[8], 0, 6);
+            }
+        }
+
+        return $serializedDate;
     }
 
     public function jsonSerialize()
